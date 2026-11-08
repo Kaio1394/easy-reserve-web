@@ -51,8 +51,7 @@ jobs:
 
       - name: Reconstruir imagem Docker e versionar container
         run: |
-          VERSION_TAG="v0.1.${{ github.run_number }}"
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd /app/easy-reserve-web && rm -rf dist && mkdir -p dist && tar -xzf dist.tar.gz -C dist && rm dist.tar.gz && echo '{\"version\":\"0.1.${{ github.run_number }}\",\"buildNumber\":\"${{ github.run_number }}\",\"commit\":\"${{ github.sha }}\",\"timestamp\":\"${{ github.event.head_commit.timestamp }}\"}' > VERSION.json && docker build -t easy-reserve-web:latest -t easy-reserve-web:\$VERSION_TAG . && docker stop easy-reserve-web && docker rm easy-reserve-web && docker run -d --name easy-reserve-web --restart always -p 9012:80 easy-reserve-web:latest"
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd /app/easy-reserve-web && rm -rf dist && mkdir -p dist && tar -xzf dist.tar.gz -C dist && rm dist.tar.gz && echo '{\"version\":\"0.1.${{ github.run_number }}\",\"buildNumber\":\"${{ github.run_number }}\",\"commit\":\"${{ github.sha }}\",\"timestamp\":\"${{ github.event.head_commit.timestamp }}\"}' > VERSION.json && docker build -t easy-reserve-web:latest -t easy-reserve-web:v0.1.${{ github.run_number }} . && docker stop easy-reserve-web && docker rm easy-reserve-web && docker run -d --name easy-reserve-web --restart always -p 9012:80 easy-reserve-web:latest"
 
       - name: Verificar integridade pós-deploy (Smoke Test)
         run: |
