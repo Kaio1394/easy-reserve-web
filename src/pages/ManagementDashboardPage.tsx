@@ -38,9 +38,9 @@ import {
 } from 'lucide-react';
 
 /**
- * PÃ¡gina de GestÃ£o Administrativa para usuÃ¡rios ADMIN e OWNER.
- * - ADMIN: pode criar, editar e excluir Ambientes, Elementos/Recursos e Chaves, mas NÃƒO pode adicionar, editar ou excluir UsuÃ¡rios.
- * - OWNER: pode tudo (Ambientes, Elementos/Recursos, Chaves e tambÃ©m adicionar, editar e excluir UsuÃ¡rios).
+ * Página de Gestão Administrativa para usuários ADMIN e OWNER.
+ * - ADMIN: pode criar, editar e excluir Ambientes, Elementos/Recursos e Chaves, mas NÃO pode adicionar, editar ou excluir Usuários.
+ * - OWNER: pode tudo (Ambientes, Elementos/Recursos, Chaves e também adicionar, editar e excluir Usuários).
  */
 export const ManagementDashboardPage: React.FC = () => {
   const { user, workspaceSlug } = useAuth();
@@ -59,10 +59,10 @@ export const ManagementDashboardPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
 
-  // Modal de InformaÃ§Ãµes Detalhadas do Ambiente (com seus elementos e chaves)
+  // Modal de Informações Detalhadas do Ambiente (com seus elementos e chaves)
   const [infoEnvId, setInfoEnvId] = useState<string | null>(null);
 
-  // Modal de InformaÃ§Ãµes Detalhadas da Reserva / HistÃ³rico
+  // Modal de Informações Detalhadas da Reserva / Histórico
   const [selectedReservationInfo, setSelectedReservationInfo] = useState<
     | { type: 'reservation'; data: ReservationGetDto }
     | { type: 'history'; data: ReservationHistoryGetDto }
@@ -75,11 +75,11 @@ export const ManagementDashboardPage: React.FC = () => {
   const [envDescription, setEnvDescription] = useState('');
   const [envCapacity, setEnvCapacity] = useState('');
 
-  // Form Cadastrar/Editar Elemento no CatÃ¡logo (MOD-03 â€” SEM quantidade, pois quantidade Ã© por ambiente)
+  // Form Cadastrar/Editar Elemento no Catálogo (MOD-03 — SEM quantidade, pois quantidade é por ambiente)
   const [editingCatalogResId, setEditingCatalogResId] = useState<string | null>(null);
   const [catalogResName, setCatalogResName] = useState('');
 
-  // Form Associar Elemento do CatÃ¡logo a um Ambiente (define a Quantidade dentro da sala e se estÃ¡ OK)
+  // Form Associar Elemento do Catálogo a um Ambiente (define a Quantidade dentro da sala e se está OK)
   const [editingAllocId, setEditingAllocId] = useState<string | null>(null);
   const [allocEnvId, setAllocEnvId] = useState<string>('');
   const [allocResourceName, setAllocResourceName] = useState<string>('');
@@ -98,13 +98,13 @@ export const ManagementDashboardPage: React.FC = () => {
   const [resvStartTime, setResvStartTime] = useState('');
   const [resvEndTime, setResvEndTime] = useState('');
 
-  // Filtros do Submenu de HistÃ³rico de Reservas
+  // Filtros do Submenu de Histórico de Reservas
   const [histFilterStartDate, setHistFilterStartDate] = useState('');
   const [histFilterEndDate, setHistFilterEndDate] = useState('');
   const [histFilterEnvId, setHistFilterEnvId] = useState('');
   const [histFilterAction, setHistFilterAction] = useState('');
 
-  // Form Criar/Editar UsuÃ¡rio (Exclusivo OWNER)
+  // Form Criar/Editar Usuário (Exclusivo OWNER)
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
   const [newUsername, setNewUsername] = useState('');
@@ -164,11 +164,11 @@ export const ManagementDashboardPage: React.FC = () => {
     loadAllData();
   }, [loadAllData]);
 
-  // Separa os itens de CatÃ¡logo (environmentId == null) e as AlocaÃ§Ãµes em Ambientes (environmentId != null)
+  // Separa os itens de Catálogo (environmentId == null) e as Alocações em Ambientes (environmentId != null)
   const catalogResources = resources.filter((r) => !r.environmentId);
   const allocatedResources = resources.filter((r) => Boolean(r.environmentId));
 
-  // Lista Ãºnica de nomes de elementos disponÃ­veis no catÃ¡logo para seleÃ§Ã£o ao associar a uma sala
+  // Lista única de nomes de elementos disponíveis no catálogo para seleção ao associar a uma sala
   const catalogNames = Array.from(
     new Set(resources.map((r) => r.name.trim()).filter(Boolean))
   );
@@ -206,7 +206,7 @@ export const ManagementDashboardPage: React.FC = () => {
           description: envDescription.trim() || undefined,
           capacity: envCapacity ? Number(envCapacity) : undefined,
         });
-        showSuccess('Ambiente fÃ­sico cadastrado com sucesso.');
+        showSuccess('Ambiente físico cadastrado com sucesso.');
       }
       resetEnvForm();
       await loadAllData();
@@ -243,7 +243,7 @@ export const ManagementDashboardPage: React.FC = () => {
     }
   };
 
-  // --- Handlers CatÃ¡logo de Elementos & Recursos (SEM quantidade e SEM ambiente) ---
+  // --- Handlers Catálogo de Elementos & Recursos (SEM quantidade e SEM ambiente) ---
   const handleSaveCatalogResource = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -278,13 +278,13 @@ export const ManagementDashboardPage: React.FC = () => {
             )
           );
         }
-        showSuccess('Elemento do catÃ¡logo atualizado com sucesso.');
+        showSuccess('Elemento do catálogo atualizado com sucesso.');
       } else {
         const alreadyExists = catalogResources.some(
           (r) => r.name.toLowerCase() === trimmedName.toLowerCase()
         );
         if (alreadyExists) {
-          setError(`O elemento "${trimmedName}" jÃ¡ estÃ¡ cadastrado no catÃ¡logo.`);
+          setError(`O elemento "${trimmedName}" já está cadastrado no catálogo.`);
           return;
         }
         await api.environmentResources.create({
@@ -295,7 +295,7 @@ export const ManagementDashboardPage: React.FC = () => {
           operational: true,
         });
         showSuccess(
-          `Elemento "${trimmedName}" cadastrado! Agora vocÃª pode associÃ¡-lo aos ambientes informando a quantidade em cada sala.`
+          `Elemento "${trimmedName}" cadastrado! Agora você pode associá-lo aos ambientes informando a quantidade em cada sala.`
         );
       }
       setEditingCatalogResId(null);
@@ -316,16 +316,16 @@ export const ManagementDashboardPage: React.FC = () => {
     setCatalogResName('');
   };
 
-  // --- Handlers AssociaÃ§Ã£o de Elemento ao Ambiente (COM quantidade na sala e Estado OK/Defeito) ---
+  // --- Handlers Associação de Elemento ao Ambiente (COM quantidade na sala e Estado OK/Defeito) ---
   const handleSaveRoomAllocation = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     if (!allocEnvId) {
-      setError('Selecione o ambiente (sala/laboratÃ³rio) para associar o elemento.');
+      setError('Selecione o ambiente (sala/laboratório) para associar o elemento.');
       return;
     }
     if (!allocResourceName.trim()) {
-      setError('Selecione um elemento do catÃ¡logo.');
+      setError('Selecione um elemento do catálogo.');
       return;
     }
 
@@ -341,7 +341,7 @@ export const ManagementDashboardPage: React.FC = () => {
           quantity: qty,
           operational: allocOperational,
         });
-        showSuccess('AssociaÃ§Ã£o do elemento na sala atualizada com sucesso.');
+        showSuccess('Associação do elemento na sala atualizada com sucesso.');
       } else {
         const existingInRoom = allocatedResources.find(
           (r) =>
@@ -429,7 +429,7 @@ export const ManagementDashboardPage: React.FC = () => {
       });
       showSuccess(
         `Estado de "${resItem.name}" alterado para ${
-          !resItem.operational ? 'OK / FUNCIONANDO' : 'DEFEITO / MANUTENÃ‡ÃƒO'
+          !resItem.operational ? 'OK / FUNCIONANDO' : 'DEFEITO / MANUTENÇÃO'
         }.`
       );
       await loadAllData();
@@ -445,7 +445,7 @@ export const ManagementDashboardPage: React.FC = () => {
       showSuccess(
         isAllocation
           ? 'Elemento desvinculado da sala.'
-          : 'Elemento removido do catÃ¡logo.'
+          : 'Elemento removido do catálogo.'
       );
       await loadAllData();
     } catch (err: any) {
@@ -486,7 +486,7 @@ export const ManagementDashboardPage: React.FC = () => {
       });
       showSuccess(
         `Status da chave ${keyItem.code} atualizado para ${
-          !keyItem.available ? 'DISPONÃVEL NA PORTARIA' : 'EM USO / RETIRADA'
+          !keyItem.available ? 'DISPONÍVEL NA PORTARIA' : 'EM USO / RETIRADA'
         }.`
       );
       await loadAllData();
@@ -506,7 +506,7 @@ export const ManagementDashboardPage: React.FC = () => {
     }
   };
 
-  // Verifica se uma chave estÃ¡ EM USO no momento exato (somente se houver reserva ativa para o momento atual)
+  // Verifica se uma chave está EM USO no momento exato (somente se houver reserva ativa para o momento atual)
   const isKeyInUseNow = (keyId: string) => {
     const now = new Date();
     return reservations.some((rv) => {
@@ -519,7 +519,7 @@ export const ManagementDashboardPage: React.FC = () => {
     });
   };
 
-  // Chaves do ambiente selecionado (prioriza chaves livres no momento, mas permite selecionar em qualquer horÃ¡rio)
+  // Chaves do ambiente selecionado (prioriza chaves livres no momento, mas permite selecionar em qualquer horário)
   const keysForSelectedEnv = keys
     .filter((k) => k.environmentId === resvEnvId)
     .sort((a, b) => Number(isKeyInUseNow(a.id)) - Number(isKeyInUseNow(b.id)));
@@ -544,7 +544,7 @@ export const ManagementDashboardPage: React.FC = () => {
       return;
     }
     if (!resvKeyId) {
-      setError('Selecione qual chave serÃ¡ utilizada na reserva.');
+      setError('Selecione qual chave será utilizada na reserva.');
       return;
     }
     setError(null);
@@ -562,7 +562,7 @@ export const ManagementDashboardPage: React.FC = () => {
       setResvStartTime('');
       setResvEndTime('');
       showSuccess(
-        `Reserva confirmada! A chave "${created.keyCode}" agora estÃ¡ com status EM USO.`
+        `Reserva confirmada! A chave "${created.keyCode}" agora está com status EM USO.`
       );
       await loadAllData();
     } catch (err: any) {
@@ -578,7 +578,7 @@ export const ManagementDashboardPage: React.FC = () => {
         status: 'COMPLETED',
       });
       showSuccess(
-        `Reserva encerrada! A chave "${resv.keyCode}" foi devolvida e estÃ¡ DISPONÃVEL no quadro.`
+        `Reserva encerrada! A chave "${resv.keyCode}" foi devolvida e está DISPONÍVEL no quadro.`
       );
       await loadAllData();
     } catch (err: any) {
@@ -597,7 +597,7 @@ export const ManagementDashboardPage: React.FC = () => {
     }
   };
 
-  // --- Handlers UsuÃ¡rios (Exclusivo OWNER) ---
+  // --- Handlers Usuários (Exclusivo OWNER) ---
   const handleSaveUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !isOwner) return;
@@ -626,7 +626,7 @@ export const ManagementDashboardPage: React.FC = () => {
           cpf: newCpf.trim() || undefined,
           role: newRole,
         });
-        showSuccess('Servidor / UsuÃ¡rio credenciado na unidade.');
+        showSuccess('Servidor / Usuário credenciado na unidade.');
       }
       resetUserForm();
       await loadAllData();
@@ -662,7 +662,7 @@ export const ManagementDashboardPage: React.FC = () => {
     setError(null);
     try {
       await api.users.delete(id);
-      showSuccess('UsuÃ¡rio removido da unidade.');
+      showSuccess('Usuário removido da unidade.');
       await loadAllData();
     } catch (err: any) {
       setError(err.message);
@@ -678,7 +678,7 @@ export const ManagementDashboardPage: React.FC = () => {
   const getEnvName = (envId?: string | null) =>
     envId
       ? environments.find((e) => e.id === envId)?.name || envId.slice(0, 8)
-      : 'CatÃ¡logo da Unidade';
+      : 'Catálogo da Unidade';
 
   const selectedInfoEnv = infoEnvId
     ? environments.find((e) => e.id === infoEnvId) || null
@@ -694,7 +694,7 @@ export const ManagementDashboardPage: React.FC = () => {
     : [];
 
   const formatDateTime = (iso?: string | null) => {
-    if (!iso) return 'â€”';
+    if (!iso) return '—';
     const d = new Date(iso);
     if (isNaN(d.getTime())) return iso;
     return d.toLocaleString('pt-BR', {
@@ -735,24 +735,24 @@ export const ManagementDashboardPage: React.FC = () => {
 
   return (
     <SeiLayout activeTab={activeTab} onSelectTab={setActiveTab} showUsersTab={true}>
-      {/* Barra de Status da OperaÃ§Ã£o */}
+      {/* Barra de Status da Operação */}
       <div className="mb-4 bg-white border border-[#b8c2cc] rounded px-4 py-2.5 flex items-center justify-between">
         <div>
           <span className="text-xs font-bold text-[#003366] uppercase">
             {activeTab === 'overview' && 'Resumo Geral da Unidade Gestora'}
             {activeTab === 'reservations' &&
-              'Reserva de Ambientes e EspaÃ§os com Controle de Chave em Uso'}
+              'Reserva de Ambientes e Espaços com Controle de Chave em Uso'}
             {activeTab === 'reservation_history' &&
-              'HistÃ³rico de Reservas e Consulta por PerÃ­odo / Data'}
+              'Histórico de Reservas e Consulta por Período / Data'}
             {activeTab === 'environments' &&
-              'GestÃ£o de Ambientes FÃ­sicos e AssociaÃ§Ã£o de Elementos (ADMIN / OWNER)'}
+              'Gestão de Ambientes Físicos e Associação de Elementos (ADMIN / OWNER)'}
             {activeTab === 'resources' &&
-              'CatÃ¡logo de Elementos & Recursos da Unidade (ADMIN / OWNER)'}
-            {activeTab === 'keys' && 'Portaria â€” Controle de EmprÃ©stimo e Guarda de Chaves'}
+              'Catálogo de Elementos & Recursos da Unidade (ADMIN / OWNER)'}
+            {activeTab === 'keys' && 'Portaria — Controle de Empréstimo e Guarda de Chaves'}
             {activeTab === 'users' &&
               (isOwner
                 ? 'Credenciamento Funcional de Servidores (Exclusivo OWNER)'
-                : 'RelaÃ§Ã£o de Servidores da Unidade (Somente Leitura para ADMIN)')}
+                : 'Relação de Servidores da Unidade (Somente Leitura para ADMIN)')}
           </span>
         </div>
 
@@ -781,18 +781,18 @@ export const ManagementDashboardPage: React.FC = () => {
       )}
 
       {/* =================================================================== */}
-      {/* MODAL DE INFORMAÃ‡Ã•ES DO AMBIENTE E ELEMENTOS ALOCADOS */}
+      {/* MODAL DE INFORMAÇÕES DO AMBIENTE E ELEMENTOS ALOCADOS */}
       {/* =================================================================== */}
       {selectedInfoEnv && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
           <div className="bg-white border border-[#b8c2cc] rounded shadow-xl w-full max-w-3xl overflow-hidden">
-            {/* CabeÃ§alho do Modal SEI */}
+            {/* Cabeçalho do Modal SEI */}
             <div className="bg-[#003366] text-white px-4 py-3 flex items-center justify-between border-b-2 border-[#002244]">
               <div className="flex items-center gap-2">
                 <Info className="w-4 h-4 text-[#99badd]" />
                 <div>
                   <h3 className="text-xs font-bold uppercase tracking-wide">
-                    Ficha TÃ©cnica do Ambiente â€” {selectedInfoEnv.name}
+                    Ficha Técnica do Ambiente — {selectedInfoEnv.name}
                   </h3>
                   <p className="text-[11px] text-[#b3c7dd]">
                     Elementos/Recursos associados, quantidades e estado operacional
@@ -821,12 +821,12 @@ export const ManagementDashboardPage: React.FC = () => {
                   <strong className="font-mono">
                     {selectedInfoEnv.capacity
                       ? `${selectedInfoEnv.capacity} lugares`
-                      : 'NÃ£o informada'}
+                      : 'Não informada'}
                   </strong>
                 </div>
                 <div>
-                  <span className="text-[#6c757d] block text-[11px]">DescriÃ§Ã£o:</span>
-                  <span>{selectedInfoEnv.description || 'â€”'}</span>
+                  <span className="text-[#6c757d] block text-[11px]">Descrição:</span>
+                  <span>{selectedInfoEnv.description || '—'}</span>
                 </div>
               </div>
 
@@ -845,7 +845,7 @@ export const ManagementDashboardPage: React.FC = () => {
                           : 'bg-amber-50 text-amber-800 border-amber-300'
                       }`}
                     >
-                      {k.code}: {!isKeyInUseNow(k.id) ? 'DISPONÃVEL' : 'EM USO'}
+                      {k.code}: {!isKeyInUseNow(k.id) ? 'DISPONÍVEL' : 'EM USO'}
                     </span>
                   ))
                 )}
@@ -865,8 +865,8 @@ export const ManagementDashboardPage: React.FC = () => {
                       <tr className="bg-[#f8f9fa] border-b border-[#ced4da]">
                         <th className="py-2 px-3 font-bold">Elemento / Equipamento</th>
                         <th className="py-2 px-3 font-bold">Quantidade na Sala</th>
-                        <th className="py-2 px-3 font-bold">EstÃ¡ OK?</th>
-                        <th className="py-2 px-3 font-bold text-right">AÃ§Ãµes</th>
+                        <th className="py-2 px-3 font-bold">Está OK?</th>
+                        <th className="py-2 px-3 font-bold text-right">Ações</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#e2e8f0]">
@@ -907,7 +907,7 @@ export const ManagementDashboardPage: React.FC = () => {
                                     : 'bg-red-50 text-red-800 border-red-300 hover:bg-red-100'
                                 }`}
                               >
-                                {alloc.operational ? 'SIM (OK)' : 'NÃƒO (DEFEITO)'}
+                                {alloc.operational ? 'SIM (OK)' : 'NÃO (DEFEITO)'}
                               </button>
                             </td>
                             <td className="py-2 px-3 text-right">
@@ -928,11 +928,11 @@ export const ManagementDashboardPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Lista de Reservas deste Ambiente (Dias e HorÃ¡rios) */}
+              {/* Lista de Reservas deste Ambiente (Dias e Horários) */}
               <div className="border border-[#b8c2cc] rounded overflow-hidden">
                 <div className="bg-[#f1f5f9] px-3.5 py-2 border-b border-[#b8c2cc] flex items-center justify-between">
                   <span className="text-xs font-bold text-[#003366] uppercase">
-                    Reservas deste Ambiente â€” Dias e HorÃ¡rios ({selectedInfoEnvReservations.length})
+                    Reservas deste Ambiente — Dias e Horários ({selectedInfoEnvReservations.length})
                   </span>
                 </div>
 
@@ -941,9 +941,9 @@ export const ManagementDashboardPage: React.FC = () => {
                     <thead>
                       <tr className="bg-[#f8f9fa] border-b border-[#ced4da]">
                         <th className="py-2 px-3 font-bold">Quem Reservou</th>
-                        <th className="py-2 px-3 font-bold">HorÃ¡rio</th>
-                        <th className="py-2 px-3 font-bold">SituaÃ§Ã£o</th>
-                        <th className="py-2 px-3 font-bold text-right">AÃ§Ãµes</th>
+                        <th className="py-2 px-3 font-bold">Horário</th>
+                        <th className="py-2 px-3 font-bold">Situação</th>
+                        <th className="py-2 px-3 font-bold text-right">Ações</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#e2e8f0]">
@@ -961,7 +961,7 @@ export const ManagementDashboardPage: React.FC = () => {
                             </td>
                             <td className="py-2.5 px-3 font-mono text-[11px] whitespace-nowrap">
                               <div className="font-semibold text-[#003366]">
-                                InÃ­cio: {formatDateTime(rv.startTime)}
+                                Início: {formatDateTime(rv.startTime)}
                               </div>
                               <div className="text-[#6c757d]">
                                 Fim: {rv.endTime ? formatDateTime(rv.endTime) : 'Em aberto'}
@@ -1010,7 +1010,7 @@ export const ManagementDashboardPage: React.FC = () => {
               </div>
             </div>
 
-            {/* RodapÃ© do Modal */}
+            {/* Rodapé do Modal */}
             <div className="bg-[#f8f9fa] px-4 py-2.5 border-t border-[#b8c2cc] flex items-center justify-end">
               <button
                 type="button"
@@ -1025,7 +1025,7 @@ export const ManagementDashboardPage: React.FC = () => {
       )}
 
       {/* =================================================================== */}
-      {/* MODAL DE INFORMAÃ‡Ã•ES DETALHADAS DA RESERVA / HISTÃ“RICO */}
+      {/* MODAL DE INFORMAÇÕES DETALHADAS DA RESERVA / HISTÓRICO */}
       {/* =================================================================== */}
       {selectedReservationInfo && (
         <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4">
@@ -1037,7 +1037,7 @@ export const ManagementDashboardPage: React.FC = () => {
                   <h3 className="text-xs font-bold uppercase tracking-wide">
                     {selectedReservationInfo.type === 'reservation'
                       ? 'Detalhes da Reserva de Ambiente'
-                      : 'Detalhes do Registro de HistÃ³rico'}
+                      : 'Detalhes do Registro de Histórico'}
                   </h3>
                   <p className="text-[11px] text-[#b3c7dd]">
                     {selectedReservationInfo.data.environmentName}
@@ -1076,12 +1076,12 @@ export const ManagementDashboardPage: React.FC = () => {
                         : 'bg-emerald-50 text-emerald-800 border-emerald-300'
                     }`}
                   >
-                    {selectedReservationInfo.data.keyCode} â€¢{' '}
+                    {selectedReservationInfo.data.keyCode} •{' '}
                     {selectedReservationInfo.data.status === 'ACTIVE' ? 'EM USO' : 'DEVOLVIDA'}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[#6c757d] block text-[11px]">SituaÃ§Ã£o da Reserva:</span>
+                  <span className="text-[#6c757d] block text-[11px]">Situação da Reserva:</span>
                   <span
                     className={`mt-0.5 inline-flex items-center px-2.5 py-0.5 rounded font-mono text-[11px] font-bold whitespace-nowrap ${
                       selectedReservationInfo.data.status === 'ACTIVE'
@@ -1099,7 +1099,7 @@ export const ManagementDashboardPage: React.FC = () => {
               <div className="border border-[#ced4da] rounded p-3.5 space-y-2">
                 <div className="pb-2 border-b border-[#e2e8f0] font-mono text-[11px]">
                   <span className="text-[#6c757d] block font-sans">
-                    HorÃ¡rio da SolicitaÃ§Ã£o de Reserva:
+                    Horário da Solicitação de Reserva:
                   </span>
                   <strong className="text-[#003366]">
                     {formatDateTime(selectedReservationInfo.data.createdAt)}
@@ -1108,14 +1108,14 @@ export const ManagementDashboardPage: React.FC = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 font-mono text-[11px]">
                   <div>
-                    <span className="text-[#6c757d] block font-sans">HorÃ¡rio de InÃ­cio:</span>
+                    <span className="text-[#6c757d] block font-sans">Horário de Início:</span>
                     <strong className="text-[#003366]">
                       {formatDateTime(selectedReservationInfo.data.startTime)}
                     </strong>
                   </div>
                   <div>
                     <span className="text-[#6c757d] block font-sans">
-                      HorÃ¡rio de TÃ©rmino / DevoluÃ§Ã£o:
+                      Horário de Término / Devolução:
                     </span>
                     <strong className="text-[#333]">
                       {selectedReservationInfo.data.endTime
@@ -1128,7 +1128,7 @@ export const ManagementDashboardPage: React.FC = () => {
                 <div className="pt-2 border-t border-[#e2e8f0]">
                   <span className="text-[#6c757d] block text-[11px]">Finalidade / Atividade:</span>
                   <p className="font-semibold text-[#333] mt-0.5">
-                    {selectedReservationInfo.data.purpose || 'NÃ£o informada'}
+                    {selectedReservationInfo.data.purpose || 'Não informada'}
                   </p>
                 </div>
 
@@ -1136,10 +1136,10 @@ export const ManagementDashboardPage: React.FC = () => {
                   <div className="pt-2 border-t border-[#e2e8f0] space-y-1">
                     <div>
                       <span className="text-[#6c757d] block text-[11px]">
-                        Registro de Auditoria / MovimentaÃ§Ã£o:
+                        Registro de Auditoria / Movimentação:
                       </span>
                       <p className="text-[#003366] font-semibold mt-0.5">
-                        {selectedReservationInfo.data.notes || 'â€”'}
+                        {selectedReservationInfo.data.notes || '—'}
                       </p>
                     </div>
                     <div className="text-[11px] text-[#6c757d] font-mono">
@@ -1191,7 +1191,7 @@ export const ManagementDashboardPage: React.FC = () => {
                 {environments.length}
               </div>
               <div className="text-[11px] text-[#6c757d] mt-1">
-                Salas, laboratÃ³rios e auditÃ³rios
+                Salas, laboratórios e auditórios
               </div>
             </div>
 
@@ -1207,7 +1207,7 @@ export const ManagementDashboardPage: React.FC = () => {
                 </span>
               </div>
               <div className="text-[11px] text-[#6c757d] mt-1">
-                {catalogNames.length} tipo(s) cadastrado(s) no catÃ¡logo
+                {catalogNames.length} tipo(s) cadastrado(s) no catálogo
               </div>
             </div>
 
@@ -1229,7 +1229,7 @@ export const ManagementDashboardPage: React.FC = () => {
 
             <div className="bg-white border border-[#b8c2cc] rounded p-4">
               <div className="flex items-center justify-between text-[#6c757d] text-xs mb-1">
-                <span className="font-bold uppercase text-[11px]">UsuÃ¡rios da Unidade</span>
+                <span className="font-bold uppercase text-[11px]">Usuários da Unidade</span>
                 <Users className="w-4 h-4 text-[#003366]" />
               </div>
               <div className="text-2xl font-bold text-[#003366] font-mono">
@@ -1255,7 +1255,7 @@ export const ManagementDashboardPage: React.FC = () => {
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="bg-[#f8f9fa] border-b border-[#b8c2cc] text-[#333]">
-                    <th className="py-2.5 px-3 font-bold">Ambiente / EspaÃ§o</th>
+                    <th className="py-2.5 px-3 font-bold">Ambiente / Espaço</th>
                     <th className="py-2.5 px-3 font-bold">Capacidade</th>
                     <th className="py-2.5 px-3 font-bold">Elementos na Sala</th>
                     <th className="py-2.5 px-3 font-bold">Chaves Vinculadas</th>
@@ -1270,7 +1270,7 @@ export const ManagementDashboardPage: React.FC = () => {
                           onClick={() => setActiveTab('environments')}
                           className="text-[#003366] font-bold underline cursor-pointer"
                         >
-                          Ambientes & EspaÃ§os
+                          Ambientes & Espaços
                         </button>{' '}
                         para adicionar o primeiro.
                       </td>
@@ -1293,7 +1293,7 @@ export const ManagementDashboardPage: React.FC = () => {
                             )}
                           </td>
                           <td className="py-2.5 px-3 font-mono">
-                            {env.capacity ? `${env.capacity} lugares` : 'â€”'}
+                            {env.capacity ? `${env.capacity} lugares` : '—'}
                           </td>
                           <td className="py-2.5 px-3">
                             <button
@@ -1328,7 +1328,7 @@ export const ManagementDashboardPage: React.FC = () => {
                                         : 'bg-amber-50 text-amber-800 border-amber-300'
                                     }`}
                                   >
-                                    {k.code}: {k.available ? 'DISPONÃVEL' : 'RETIRADA'}
+                                    {k.code}: {k.available ? 'DISPONÍVEL' : 'RETIRADA'}
                                   </span>
                                 ))}
                               </div>
@@ -1346,7 +1346,7 @@ export const ManagementDashboardPage: React.FC = () => {
       )}
 
       {/* =================================================================== */}
-      {/* ABA 2: AMBIENTES & ESPAÃ‡OS + ASSOCIAÃ‡ÃƒO DE ELEMENTOS (QTD NA SALA) */}
+      {/* ABA 2: AMBIENTES & ESPAÇOS + ASSOCIAÇÃO DE ELEMENTOS (QTD NA SALA) */}
       {/* =================================================================== */}
       {activeTab === 'environments' && (
         <div className="space-y-5">
@@ -1356,21 +1356,21 @@ export const ManagementDashboardPage: React.FC = () => {
               <span className="text-xs font-bold uppercase">
                 {editingEnvId
                   ? 'Editar Ambiente Selecionado'
-                  : '1. Cadastrar Novo Ambiente / LaboratÃ³rio / Sala'}
+                  : '1. Cadastrar Novo Ambiente / Laboratório / Sala'}
               </span>
             </div>
 
             <form onSubmit={handleSaveEnvironment} className="p-5 space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-2">
                 <label className="text-xs font-bold text-[#333] md:text-right">
-                  IdentificaÃ§Ã£o do Ambiente: *
+                  Identificação do Ambiente: *
                 </label>
                 <div className="md:col-span-2">
                   <input
                     type="text"
                     value={envName}
                     onChange={(e) => setEnvName(e.target.value)}
-                    placeholder="ex: Bloco A - LaboratÃ³rio de Redes (A-204)"
+                    placeholder="ex: Bloco A - Laboratório de Redes (A-204)"
                     required
                     className="w-full border border-[#ced4da] rounded px-3 py-1.5 text-xs focus:outline-none focus:border-[#003366]"
                   />
@@ -1379,14 +1379,14 @@ export const ManagementDashboardPage: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-2">
                 <label className="text-xs font-bold text-[#333] md:text-right">
-                  DescriÃ§Ã£o:
+                  Descrição:
                 </label>
                 <div className="md:col-span-2">
                   <input
                     type="text"
                     value={envDescription}
                     onChange={(e) => setEnvDescription(e.target.value)}
-                    placeholder="ex: LaboratÃ³rio de informÃ¡tica do 2Âº andar"
+                    placeholder="ex: Laboratório de informática do 2º andar"
                     className="w-full border border-[#ced4da] rounded px-3 py-1.5 text-xs focus:outline-none focus:border-[#003366]"
                   />
                 </div>
@@ -1394,7 +1394,7 @@ export const ManagementDashboardPage: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-2">
                 <label className="text-xs font-bold text-[#333] md:text-right">
-                  Capacidade MÃ¡xima:
+                  Capacidade Máxima:
                 </label>
                 <div className="md:col-span-2 flex flex-wrap items-center gap-3">
                   <input
@@ -1410,7 +1410,7 @@ export const ManagementDashboardPage: React.FC = () => {
                     className="flex items-center gap-1.5 px-5 py-1.5 bg-[#003366] hover:bg-[#002244] text-white font-bold rounded text-xs uppercase tracking-wider transition cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
-                    <span>{editingEnvId ? 'Salvar AlteraÃ§Ãµes' : 'Registrar Ambiente'}</span>
+                    <span>{editingEnvId ? 'Salvar Alterações' : 'Registrar Ambiente'}</span>
                   </button>
                   {editingEnvId && (
                     <button
@@ -1443,7 +1443,7 @@ export const ManagementDashboardPage: React.FC = () => {
             {catalogNames.length === 0 ? (
               <div className="p-4 text-xs text-[#495057] bg-[#f8f9fa] flex items-center justify-between">
                 <span>
-                  Nenhum elemento cadastrado no catÃ¡logo ainda. Cadastre primeiro os elementos (ex.: Ar-Condicionado XPTO, Cadeira, Projetor) na aba{' '}
+                  Nenhum elemento cadastrado no catálogo ainda. Cadastre primeiro os elementos (ex.: Ar-Condicionado XPTO, Cadeira, Projetor) na aba{' '}
                   <strong>Elementos & Recursos</strong>.
                 </span>
                 <button
@@ -1517,8 +1517,8 @@ export const ManagementDashboardPage: React.FC = () => {
                       onChange={(e) => setAllocOperational(e.target.value === 'true')}
                       className="border border-[#ced4da] rounded px-3 py-1.5 text-xs bg-white font-semibold focus:outline-none focus:border-[#003366]"
                     >
-                      <option value="true">EstÃ¡ OK / Funcionando</option>
-                      <option value="false">Com Defeito / ManutenÃ§Ã£o</option>
+                      <option value="true">Está OK / Funcionando</option>
+                      <option value="false">Com Defeito / Manutenção</option>
                     </select>
 
                     <button
@@ -1527,7 +1527,7 @@ export const ManagementDashboardPage: React.FC = () => {
                     >
                       <Link2 className="w-3.5 h-3.5" />
                       <span>
-                        {editingAllocId ? 'Atualizar na Sala' : 'Associar Ã  Sala'}
+                        {editingAllocId ? 'Atualizar na Sala' : 'Associar à Sala'}
                       </span>
                     </button>
 
@@ -1547,11 +1547,11 @@ export const ManagementDashboardPage: React.FC = () => {
             )}
           </div>
 
-          {/* Tabela de Ambientes com BotÃ£o de Info para abrir a Janela de Elementos */}
+          {/* Tabela de Ambientes com Botão de Info para abrir a Janela de Elementos */}
           <div className="bg-white border border-[#b8c2cc] rounded overflow-hidden">
             <div className="bg-[#f8f9fa] px-4 py-2.5 border-b border-[#b8c2cc] flex items-center justify-between">
               <span className="text-xs font-bold text-[#003366] uppercase">
-                RelaÃ§Ã£o de Ambientes Cadastrados ({environments.length})
+                Relação de Ambientes Cadastrados ({environments.length})
               </span>
             </div>
 
@@ -1560,16 +1560,16 @@ export const ManagementDashboardPage: React.FC = () => {
                 <thead>
                   <tr className="bg-[#f1f5f9] border-b border-[#b8c2cc]">
                     <th className="py-2.5 px-3 font-bold">Ambiente</th>
-                    <th className="py-2.5 px-3 font-bold">DescriÃ§Ã£o</th>
+                    <th className="py-2.5 px-3 font-bold">Descrição</th>
                     <th className="py-2.5 px-3 font-bold">Capacidade</th>
-                    <th className="py-2.5 px-3 font-bold text-right">AÃ§Ãµes</th>
+                    <th className="py-2.5 px-3 font-bold text-right">Ações</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#e2e8f0]">
                   {environments.length === 0 ? (
                     <tr>
                       <td colSpan={4} className="py-6 text-center text-[#6c757d]">
-                        Nenhum ambiente registrado atÃ© o momento.
+                        Nenhum ambiente registrado até o momento.
                       </td>
                     </tr>
                   ) : (
@@ -1587,17 +1587,17 @@ export const ManagementDashboardPage: React.FC = () => {
                             {env.name}
                           </td>
                           <td className="py-2.5 px-3 text-[#495057]">
-                            {env.description || 'â€”'}
+                            {env.description || '—'}
                           </td>
                           <td className="py-2.5 px-3 font-mono">
-                            {env.capacity || 'â€”'}
+                            {env.capacity || '—'}
                           </td>
                           <td className="py-2.5 px-3 text-right space-x-2">
                             <button
                               type="button"
                               onClick={() => setInfoEnvId(env.id)}
                               className="inline-flex items-center gap-1.5 bg-[#003366] hover:bg-[#002244] text-white font-semibold px-2.5 py-1 rounded text-xs transition cursor-pointer"
-                              title="Ver informaÃ§Ãµes e elementos associados ao ambiente"
+                              title="Ver informações e elementos associados ao ambiente"
                             >
                               <Info className="w-3.5 h-3.5" />
                               <span>Info ({envAllocations.length})</span>
@@ -1634,17 +1634,17 @@ export const ManagementDashboardPage: React.FC = () => {
       )}
 
       {/* =================================================================== */}
-      {/* ABA 3: ELEMENTOS & RECURSOS (CATÃLOGO SEM QUANTIDADE) */}
+      {/* ABA 3: ELEMENTOS & RECURSOS (CATÁLOGO SEM QUANTIDADE) */}
       {/* =================================================================== */}
       {activeTab === 'resources' && (
         <div className="space-y-5">
-          {/* Painel 1: Cadastrar Elemento no CatÃ¡logo (SEM quantidade!) */}
+          {/* Painel 1: Cadastrar Elemento no Catálogo (SEM quantidade!) */}
           <div className="bg-white border border-[#b8c2cc] rounded overflow-hidden">
             <div className="bg-[#003366] text-white px-4 py-2.5 flex items-center justify-between">
               <span className="text-xs font-bold uppercase">
                 {editingCatalogResId
                   ? 'Editar Nome do Elemento / Recurso'
-                  : 'Cadastrar Novo Elemento / Equipamento no CatÃ¡logo'}
+                  : 'Cadastrar Novo Elemento / Equipamento no Catálogo'}
               </span>
             </div>
 
@@ -1658,7 +1658,7 @@ export const ManagementDashboardPage: React.FC = () => {
                     type="text"
                     value={catalogResName}
                     onChange={(e) => setCatalogResName(e.target.value)}
-                    placeholder="ex: Ar-Condicionado Split XPTO, Cadeira UniversitÃ¡ria, Projetor Epson"
+                    placeholder="ex: Ar-Condicionado Split XPTO, Cadeira Universitária, Projetor Epson"
                     required
                     className="flex-1 min-w-[240px] border border-[#ced4da] rounded px-3 py-1.5 text-xs focus:outline-none focus:border-[#003366]"
                   />
@@ -1669,7 +1669,7 @@ export const ManagementDashboardPage: React.FC = () => {
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>
-                      {editingCatalogResId ? 'Salvar AlteraÃ§Ã£o' : 'Cadastrar Elemento'}
+                      {editingCatalogResId ? 'Salvar Alteração' : 'Cadastrar Elemento'}
                     </span>
                   </button>
 
@@ -1688,17 +1688,17 @@ export const ManagementDashboardPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <div></div>
                 <p className="md:col-span-2 text-[11px] text-[#6c757d]">
-                  Cadastre aqui o tipo/modelo do equipamento (sem quantidade). A quantidade Ã© definida na hora de associar o elemento dentro de cada ambiente/sala.
+                  Cadastre aqui o tipo/modelo do equipamento (sem quantidade). A quantidade é definida na hora de associar o elemento dentro de cada ambiente/sala.
                 </p>
               </div>
             </form>
           </div>
 
-          {/* Tabela do CatÃ¡logo de Elementos */}
+          {/* Tabela do Catálogo de Elementos */}
           <div className="bg-white border border-[#b8c2cc] rounded overflow-hidden">
             <div className="bg-[#f8f9fa] px-4 py-2.5 border-b border-[#b8c2cc] flex items-center justify-between">
               <span className="text-xs font-bold text-[#003366] uppercase">
-                CatÃ¡logo de Elementos Cadastrados ({catalogResources.length})
+                Catálogo de Elementos Cadastrados ({catalogResources.length})
               </span>
               <button
                 type="button"
@@ -1706,7 +1706,7 @@ export const ManagementDashboardPage: React.FC = () => {
                 className="text-xs text-[#003366] hover:underline font-semibold flex items-center gap-1 cursor-pointer"
               >
                 <Link2 className="w-3.5 h-3.5" />
-                <span>Associar Elementos Ã s Salas em Ambientes & EspaÃ§os â†’</span>
+                <span>Associar Elementos às Salas em Ambientes & Espaços →</span>
               </button>
             </div>
 
@@ -1716,14 +1716,14 @@ export const ManagementDashboardPage: React.FC = () => {
                   <tr className="bg-[#f1f5f9] border-b border-[#b8c2cc]">
                     <th className="py-2.5 px-3 font-bold">Elemento / Equipamento</th>
                     <th className="py-2.5 px-3 font-bold">Ambientes Associados</th>
-                    <th className="py-2.5 px-3 font-bold text-right">AÃ§Ãµes</th>
+                    <th className="py-2.5 px-3 font-bold text-right">Ações</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#e2e8f0]">
                   {catalogResources.length === 0 ? (
                     <tr>
                       <td colSpan={3} className="py-6 text-center text-[#6c757d]">
-                        Nenhum elemento cadastrado no catÃ¡logo atÃ© o momento.
+                        Nenhum elemento cadastrado no catálogo até o momento.
                       </td>
                     </tr>
                   ) : (
@@ -1738,7 +1738,7 @@ export const ManagementDashboardPage: React.FC = () => {
                           </td>
                           <td className="py-2.5 px-3 font-mono text-[#495057]">
                             {roomUsages.length === 0
-                              ? 'NÃ£o associado a nenhuma sala'
+                              ? 'Não associado a nenhuma sala'
                               : `Associado em ${roomUsages.length} ambiente(s)`}
                           </td>
                           <td className="py-2.5 px-3 text-right space-x-2">
@@ -1776,7 +1776,7 @@ export const ManagementDashboardPage: React.FC = () => {
           <div className="bg-white border border-[#b8c2cc] rounded overflow-hidden">
             <div className="bg-[#003366] text-white px-4 py-2.5 flex items-center justify-between">
               <span className="text-xs font-bold uppercase">
-                Vincular Nova Chave FÃ­sica a um Ambiente
+                Vincular Nova Chave Física a um Ambiente
               </span>
             </div>
 
@@ -1804,7 +1804,7 @@ export const ManagementDashboardPage: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-2">
                 <label className="text-xs font-bold text-[#333] md:text-right">
-                  CÃ³digo / Tag da Chave: *
+                  Código / Tag da Chave: *
                 </label>
                 <div className="md:col-span-2 flex items-center gap-3">
                   <input
@@ -1830,7 +1830,7 @@ export const ManagementDashboardPage: React.FC = () => {
           <div className="bg-white border border-[#b8c2cc] rounded overflow-hidden">
             <div className="bg-[#f8f9fa] px-4 py-2.5 border-b border-[#b8c2cc] flex items-center justify-between">
               <span className="text-xs font-bold text-[#003366] uppercase">
-                ClaviculÃ¡rio da Portaria ({keys.length})
+                Claviculário da Portaria ({keys.length})
               </span>
             </div>
 
@@ -1838,10 +1838,10 @@ export const ManagementDashboardPage: React.FC = () => {
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="bg-[#f1f5f9] border-b border-[#b8c2cc]">
-                    <th className="py-2.5 px-3 font-bold">CÃ³digo</th>
+                    <th className="py-2.5 px-3 font-bold">Código</th>
                     <th className="py-2.5 px-3 font-bold">Ambiente</th>
-                    <th className="py-2.5 px-3 font-bold">SituaÃ§Ã£o na Portaria</th>
-                    <th className="py-2.5 px-3 font-bold text-right">OperaÃ§Ã£o</th>
+                    <th className="py-2.5 px-3 font-bold">Situação na Portaria</th>
+                    <th className="py-2.5 px-3 font-bold text-right">Operação</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#e2e8f0]">
@@ -1868,7 +1868,7 @@ export const ManagementDashboardPage: React.FC = () => {
                                 : 'bg-amber-50 text-amber-800 border-amber-300'
                             }`}
                           >
-                            {!isKeyInUseNow(k.id) ? 'DISPONÃVEL NO QUADRO' : 'EM USO NO MOMENTO'}
+                            {!isKeyInUseNow(k.id) ? 'DISPONÍVEL NO QUADRO' : 'EM USO NO MOMENTO'}
                           </span>
                         </td>
                         <td className="py-2.5 px-3 text-right space-x-2">
@@ -1876,7 +1876,7 @@ export const ManagementDashboardPage: React.FC = () => {
                             onClick={() => handleToggleKeyAvailability(k)}
                             className="px-2.5 py-1 bg-[#003366] hover:bg-[#002244] text-white rounded text-[11px] font-semibold transition cursor-pointer"
                           >
-                            {k.available ? 'Registrar Retirada' : 'Registrar DevoluÃ§Ã£o'}
+                            {k.available ? 'Registrar Retirada' : 'Registrar Devolução'}
                           </button>
                           <button
                             onClick={() => handleDeleteKey(k.id)}
@@ -1901,14 +1901,14 @@ export const ManagementDashboardPage: React.FC = () => {
       {/* =================================================================== */}
       {activeTab === 'reservations' && (
         <div className="space-y-5">
-          {/* Assistente Inteligente de RecomendaÃ§Ã£o de Salas */}
+          {/* Assistente Inteligente de Recomendação de Salas */}
           {user?.workspaceId && (
             <EnvironmentRecommendationAssistant
               workspaceId={user.workspaceId}
               catalogResources={catalogResources}
               onSelectEnvironment={(envId) => {
                 setResvEnvId(envId);
-                showSuccess('Ambiente selecionado a partir da recomendaÃ§Ã£o!');
+                showSuccess('Ambiente selecionado a partir da recomendação!');
               }}
               initialStartTime={resvStartTime}
               initialEndTime={resvEndTime}
@@ -1930,17 +1930,17 @@ export const ManagementDashboardPage: React.FC = () => {
       )}
 
       {/* =================================================================== */}
-      {/* SUBMENU MOD-06: HISTÃ“RICO DE RESERVAS COM FILTRO POR DATA */}
+      {/* SUBMENU MOD-06: HISTÓRICO DE RESERVAS COM FILTRO POR DATA */}
       {/* =================================================================== */}
       {activeTab === 'reservation_history' && (
         <div className="space-y-5">
-          {/* Painel de Filtros por Data, Ambiente e SituaÃ§Ã£o */}
+          {/* Painel de Filtros por Data, Ambiente e Situação */}
           <div className="bg-white border border-[#b8c2cc] rounded overflow-hidden">
             <div className="bg-[#003366] text-white px-4 py-2.5 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <History className="w-4 h-4 text-[#99badd]" />
                 <span className="text-xs font-bold uppercase">
-                  Filtrar HistÃ³rico de Reservas por Data / PerÃ­odo
+                  Filtrar Histórico de Reservas por Data / Período
                 </span>
               </div>
             </div>
@@ -1972,7 +1972,7 @@ export const ManagementDashboardPage: React.FC = () => {
 
               <div>
                 <label className="text-[11px] font-bold text-[#333] block mb-1">
-                  Ambiente / EspaÃ§o:
+                  Ambiente / Espaço:
                 </label>
                 <select
                   value={histFilterEnvId}
@@ -1990,18 +1990,18 @@ export const ManagementDashboardPage: React.FC = () => {
 
               <div>
                 <label className="text-[11px] font-bold text-[#333] block mb-1">
-                  SituaÃ§Ã£o / Evento:
+                  Situação / Evento:
                 </label>
                 <select
                   value={histFilterAction}
                   onChange={(e) => setHistFilterAction(e.target.value)}
                   className="w-full bg-white border border-[#ced4da] rounded px-2.5 py-1.5 text-xs focus:outline-none focus:border-[#003366]"
                 >
-                  <option value="">Todas as situaÃ§Ãµes</option>
+                  <option value="">Todas as situações</option>
                   <option value="CREATED">Reservado</option>
                   <option value="COMPLETED">Chave Devolvida</option>
                   <option value="CANCELLED">Cancelada</option>
-                  <option value="DELETED">ExcluÃ­da</option>
+                  <option value="DELETED">Excluída</option>
                 </select>
               </div>
 
@@ -2022,13 +2022,13 @@ export const ManagementDashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Tabela de HistÃ³rico de Reservas (tb_reservation_histories) */}
+          {/* Tabela de Histórico de Reservas (tb_reservation_histories) */}
           <div className="bg-white border border-[#b8c2cc] rounded overflow-hidden">
             <div className="bg-[#f8f9fa] px-4 py-2.5 border-b border-[#b8c2cc] flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <History className="w-4 h-4 text-[#003366]" />
                 <span className="text-xs font-bold text-[#003366] uppercase">
-                  HistÃ³rico de Reservas ({filteredReservationHistories.length})
+                  Histórico de Reservas ({filteredReservationHistories.length})
                 </span>
               </div>
             </div>
@@ -2040,10 +2040,10 @@ export const ManagementDashboardPage: React.FC = () => {
                     <th className="py-2.5 px-3 font-bold whitespace-nowrap">Ambiente</th>
                     <th className="py-2.5 px-3 font-bold whitespace-nowrap">Quem Reservou</th>
                     <th className="py-2.5 px-3 font-bold whitespace-nowrap">
-                      HorÃ¡rio da SolicitaÃ§Ã£o
+                      Horário da Solicitação
                     </th>
-                    <th className="py-2.5 px-3 font-bold whitespace-nowrap">SituaÃ§Ã£o</th>
-                    <th className="py-2.5 px-3 font-bold text-right whitespace-nowrap">AÃ§Ãµes</th>
+                    <th className="py-2.5 px-3 font-bold whitespace-nowrap">Situação</th>
+                    <th className="py-2.5 px-3 font-bold text-right whitespace-nowrap">Ações</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#e2e8f0]">
@@ -2073,7 +2073,7 @@ export const ManagementDashboardPage: React.FC = () => {
                             }
                           : hist.action === 'DELETED'
                           ? {
-                              label: 'EXCLUÃDA',
+                              label: 'EXCLUÍDA',
                               cls: 'bg-red-50 text-red-800 border-red-300',
                             }
                           : {
@@ -2123,7 +2123,7 @@ export const ManagementDashboardPage: React.FC = () => {
       )}
 
       {/* =================================================================== */}
-      {/* ABA 5: SERVIDORES & USUÃRIOS (CRUD exclusivo para OWNER; Leitura para ADMIN) */}
+      {/* ABA 5: SERVIDORES & USUÁRIOS (CRUD exclusivo para OWNER; Leitura para ADMIN) */}
       {/* =================================================================== */}
       {activeTab === 'users' && (
         <div className="space-y-5">
@@ -2131,8 +2131,8 @@ export const ManagementDashboardPage: React.FC = () => {
             <div className="bg-amber-50 border-l-4 border-amber-600 p-3.5 text-xs text-amber-900 flex items-center gap-2.5">
               <Lock className="w-4 h-4 text-amber-700 shrink-0" />
               <span>
-                <strong>PermissÃ£o Restrita ao Gestor (OWNER):</strong> Como{' '}
-                <code className="font-mono font-bold">ADMIN</code>, vocÃª pode gerenciar Ambientes, Elementos e Chaves, mas o credenciamento, ediÃ§Ã£o e exclusÃ£o de usuÃ¡rios sÃ£o exclusivos do perfil{' '}
+                <strong>Permissão Restrita ao Gestor (OWNER):</strong> Como{' '}
+                <code className="font-mono font-bold">ADMIN</code>, você pode gerenciar Ambientes, Elementos e Chaves, mas o credenciamento, edição e exclusão de usuários são exclusivos do perfil{' '}
                 <code className="font-mono font-bold">OWNER</code>.
               </span>
             </div>
@@ -2141,7 +2141,7 @@ export const ManagementDashboardPage: React.FC = () => {
               <div className="bg-[#003366] text-white px-4 py-2.5 flex items-center justify-between">
                 <span className="text-xs font-bold uppercase">
                   {editingUserId
-                    ? 'Editar Servidor / UsuÃ¡rio da Unidade'
+                    ? 'Editar Servidor / Usuário da Unidade'
                     : 'Credenciar Novo Servidor / Operador na Unidade'}
                 </span>
               </div>
@@ -2156,7 +2156,7 @@ export const ManagementDashboardPage: React.FC = () => {
                       type="text"
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}
-                      placeholder="ex: Kaio CÃ¢ndido Santiago"
+                      placeholder="ex: Kaio Cândido Santiago"
                       required
                       className="w-full border border-[#ced4da] rounded px-3 py-1.5 text-xs focus:outline-none focus:border-[#003366]"
                     />
@@ -2229,7 +2229,7 @@ export const ManagementDashboardPage: React.FC = () => {
                       placeholder={
                         editingUserId
                           ? 'Deixe em branco para manter a senha'
-                          : 'MÃ­nimo de 6 caracteres'
+                          : 'Mínimo de 6 caracteres'
                       }
                       minLength={6}
                       required={!editingUserId}
@@ -2241,7 +2241,7 @@ export const ManagementDashboardPage: React.FC = () => {
                       className="border border-[#ced4da] rounded px-3 py-1.5 text-xs bg-white font-mono focus:outline-none focus:border-[#003366]"
                     >
                       <option value="COMMON">COMMON (Servidor/Consulta)</option>
-                      <option value="ADMIN">ADMIN (Gestor de EspaÃ§os/Chaves)</option>
+                      <option value="ADMIN">ADMIN (Gestor de Espaços/Chaves)</option>
                       <option value="OWNER">OWNER (Gestor Total da Unidade)</option>
                     </select>
                     <button
@@ -2270,7 +2270,7 @@ export const ManagementDashboardPage: React.FC = () => {
           <div className="bg-white border border-[#b8c2cc] rounded overflow-hidden">
             <div className="bg-[#f8f9fa] px-4 py-2.5 border-b border-[#b8c2cc]">
               <span className="text-xs font-bold text-[#003366] uppercase">
-                UsuÃ¡rios Vinculados Ã  Unidade ({users.length})
+                Usuários Vinculados à Unidade ({users.length})
               </span>
             </div>
 
@@ -2279,12 +2279,12 @@ export const ManagementDashboardPage: React.FC = () => {
                 <thead>
                   <tr className="bg-[#f1f5f9] border-b border-[#b8c2cc]">
                     <th className="py-2.5 px-3 font-bold">Nome Completo</th>
-                    <th className="py-2.5 px-3 font-bold">UsuÃ¡rio</th>
+                    <th className="py-2.5 px-3 font-bold">Usuário</th>
                     <th className="py-2.5 px-3 font-bold">E-mail</th>
                     <th className="py-2.5 px-3 font-bold">CPF</th>
                     <th className="py-2.5 px-3 font-bold">Perfil</th>
                     {isOwner && (
-                      <th className="py-2.5 px-3 font-bold text-right">AÃ§Ãµes</th>
+                      <th className="py-2.5 px-3 font-bold text-right">Ações</th>
                     )}
                   </tr>
                 </thead>
@@ -2298,7 +2298,7 @@ export const ManagementDashboardPage: React.FC = () => {
                         {u.username}
                       </td>
                       <td className="py-2.5 px-3">{u.email}</td>
-                      <td className="py-2.5 px-3 font-mono">{u.cpf || 'â€”'}</td>
+                      <td className="py-2.5 px-3 font-mono">{u.cpf || '—'}</td>
                       <td className="py-2.5 px-3">
                         <span className="px-2 py-0.5 rounded bg-[#eef1f4] text-[#003366] font-mono font-bold text-[11px]">
                           {u.role}
