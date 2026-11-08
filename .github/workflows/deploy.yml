@@ -1,0 +1,44 @@
+name: Deploy Web Frontend to Linux Server
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Compilar Frontend (Build de Produção)
+        run: npm run build
+
+      - name: Empacotar pasta dist
+        run: tar -czf dist.tar.gz -C dist .
+
+      - name: Configurar Chave SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Enviar pacote dist para o Servidor Linux
+        run: |
+          scp -i ~/.ssh/id_rsa dist.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/app/easy-reserve-web/dist.tar.gz
+
+      - name: Reconstruir imagem Docker e reiniciar container
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd /app/easy-reserve-web && rm -rf dist && mkdir -p dist && tar -xzf dist.tar.gz -C dist && rm dist.tar.gz && docker build -t easy-reserve-web:latest . && docker stop easy-reserve-web && docker rm easy-reserve-web && docker run -d --name easy-reserve-web --restart always -p 9012:80 easy-reserve-web:latest"
