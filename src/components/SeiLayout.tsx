@@ -1,6 +1,7 @@
 import React from 'react';
 import { ReservaFacilLogo } from './ReservaFacilLogo';
 import { useAuth } from '../context/AuthContext';
+import { APP_VERSION } from '../version';
 import {
   Building2,
   CalendarCheck,
@@ -294,9 +295,15 @@ export const SeiLayout: React.FC<SeiLayoutProps> = ({
       {/* Rodapé Institucional */}
       <footer className="bg-white border-t border-[#b8c2cc] py-3 px-4 text-xs text-[#6c757d]">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>
-            RESERVA FÁCIL — Gestão de Espaços e Controle de Chaves
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span>
+              RESERVA FÁCIL — Gestão de Espaços e Controle de Chaves
+            </span>
+            <span className="text-[#adb5bd]">•</span>
+            <span className="font-mono text-[11px] text-[#003366] font-semibold bg-[#eef4fb] px-1.5 py-0.5 rounded border border-[#d0e1f3]" title={`Commit: ${APP_VERSION.gitCommit} • Build: ${APP_VERSION.buildTime}`}>
+              v{APP_VERSION.version} (build #{APP_VERSION.buildNumber})
+            </span>
+          </div>
           <span className="font-mono text-[11px]">
             WORKSPACE: {unitSlug} • PERFIL: {user?.role}
           </span>

@@ -5,6 +5,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -12,6 +15,8 @@ jobs:
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Configurar Node.js 20
         uses: actions/setup-node@v4
@@ -22,7 +27,12 @@ jobs:
       - name: Instalar dependências
         run: npm ci
 
-      - name: Compilar Frontend (Build de Produção)
+      - name: Compilar Frontend com metadados de versão
+        env:
+          VITE_APP_VERSION: "0.1.${{ github.run_number }}"
+          VITE_BUILD_NUMBER: "${{ github.run_number }}"
+          VITE_GIT_COMMIT: "${{ github.sha }}"
+          VITE_BUILD_TIME: "${{ github.event.head_commit.timestamp }}"
         run: npm run build
 
       - name: Empacotar pasta dist
@@ -39,6 +49,27 @@ jobs:
         run: |
           scp -i ~/.ssh/id_rsa dist.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/app/easy-reserve-web/dist.tar.gz
 
-      - name: Reconstruir imagem Docker e reiniciar container
+      - name: Reconstruir imagem Docker e versionar container
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd /app/easy-reserve-web && rm -rf dist && mkdir -p dist && tar -xzf dist.tar.gz -C dist && rm dist.tar.gz && docker build -t easy-reserve-web:latest . && docker stop easy-reserve-web && docker rm easy-reserve-web && docker run -d --name easy-reserve-web --restart always -p 9012:80 easy-reserve-web:latest"
+          VERSION_TAG="v0.1.${{ github.run_number }}"
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd /app/easy-reserve-web && rm -rf dist && mkdir -p dist && tar -xzf dist.tar.gz -C dist && rm dist.tar.gz && echo '{\"version\":\"0.1.${{ github.run_number }}\",\"buildNumber\":\"${{ github.run_number }}\",\"commit\":\"${{ github.sha }}\",\"timestamp\":\"${{ github.event.head_commit.timestamp }}\"}' > VERSION.json && docker build -t easy-reserve-web:latest -t easy-reserve-web:\$VERSION_TAG . && docker stop easy-reserve-web && docker rm easy-reserve-web && docker run -d --name easy-reserve-web --restart always -p 9012:80 easy-reserve-web:latest"
+
+      - name: Verificar integridade pós-deploy (Smoke Test)
+        run: |
+          sleep 4
+          HTTP_CODE=$(curl -k -s -o /dev/null -w "%{http_code}" https://easy-reserve.72-60-158-216.sslip.io)
+          echo "Healthcheck Frontend HTTP status: $HTTP_CODE"
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "O frontend não respondeu HTTP 200 no Smoke Test!"
+            exit 1
+          fi
+
+      - name: Criar Git Tag de Versão no GitHub
+        run: |
+          TAG_NAME="v0.1.${{ github.run_number }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG_NAME" -m "Release $TAG_NAME - Build #${{ github.run_number }}"
+          git push origin "$TAG_NAME"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

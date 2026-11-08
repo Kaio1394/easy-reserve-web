@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
+import { APP_VERSION } from '../version';
 import {
   AlertCircle,
   Building2,
@@ -122,6 +123,9 @@ export const UserProfileSettings: React.FC = () => {
             <span className="text-[#6c757d] flex items-center gap-1 font-semibold text-[11px]">
               <Building2 className="w-3.5 h-3.5 text-[#003366]" />
               {workspace?.name || user?.workspaceName || 'Unidade Vinculada'}
+            </span>
+            <span className="font-mono text-[10px] text-[#475569] bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">
+              Versão {APP_VERSION.version} • Build #{APP_VERSION.buildNumber} ({APP_VERSION.shortCommit})
             </span>
           </div>
         </div>
